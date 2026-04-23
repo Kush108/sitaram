@@ -478,6 +478,107 @@ body::before{
 /* Textarea no scrollbar on short content */
 textarea{scrollbar-width:none}
 textarea::-webkit-scrollbar{display:none}
+
+/* ===== SYNC FAB ===== */
+.sync-fab{
+  position:fixed;bottom:24px;right:18px;z-index:500;
+  width:52px;height:52px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--saffron),var(--gold));
+  box-shadow:0 4px 20px rgba(255,117,24,.4);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;transition:transform .2s,box-shadow .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.sync-fab:active{transform:scale(.92);box-shadow:0 2px 10px rgba(255,117,24,.3)}
+.sync-fab .fab-dot{
+  position:absolute;top:2px;right:2px;
+  width:12px;height:12px;border-radius:50%;
+  background:var(--green);border:2px solid var(--bg);
+  font-size:7px;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;
+}
+
+/* ===== SYNC MODAL ===== */
+.modal-backdrop{
+  position:fixed;inset:0;z-index:600;
+  background:rgba(4,4,10,.85);backdrop-filter:blur(8px);
+  display:none;align-items:flex-end;justify-content:center;
+  padding:0;
+}
+.modal-backdrop.open{display:flex;animation:bdFadeIn .2s ease}
+@keyframes bdFadeIn{from{opacity:0}to{opacity:1}}
+
+.sync-modal{
+  width:100%;max-width:560px;
+  background:var(--s1);border:1px solid var(--bd2);
+  border-radius:24px 24px 0 0;
+  padding:0 0 max(env(safe-area-inset-bottom),20px);
+  animation:slideUp .3s cubic-bezier(.34,1.2,.64,1);
+  max-height:92vh;overflow-y:auto;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+.modal-drag{
+  width:40px;height:4px;background:var(--bd2);
+  border-radius:2px;margin:12px auto 0;
+}
+.modal-title{
+  font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;
+  color:var(--saffron);padding:14px 20px 0;
+}
+.modal-sub{font-size:11px;color:var(--t3);padding:3px 20px 14px;border-bottom:1px solid var(--bd)}
+
+.sync-section{padding:16px 20px;border-bottom:1px solid var(--bd)}
+.sync-sec-title{
+  font-size:10px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:var(--t3);margin-bottom:10px;
+  display:flex;align-items:center;gap:6px;
+}
+.sync-btn{
+  width:100%;padding:13px 16px;border-radius:12px;border:none;
+  cursor:pointer;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .15s;margin-bottom:8px;-webkit-tap-highlight-color:transparent;
+}
+.sync-btn:last-child{margin-bottom:0}
+.sync-btn:active{transform:scale(.97)}
+.sync-btn.primary{background:linear-gradient(135deg,var(--saffron),var(--gold));color:#000}
+.sync-btn.secondary{background:var(--s2);color:var(--t2);border:1px solid var(--bd2)}
+.sync-btn.danger{background:rgba(220,38,38,.08);color:var(--red);border:1px solid rgba(220,38,38,.2)}
+.sync-btn.green{background:rgba(22,163,74,.1);color:var(--green);border:1px solid rgba(22,163,74,.2)}
+
+.code-box{
+  background:var(--s3);border:1px solid var(--bd2);border-radius:10px;
+  padding:10px 14px;font-family:monospace;font-size:9.5px;
+  color:var(--t3);word-break:break-all;line-height:1.4;
+  max-height:80px;overflow:hidden;position:relative;margin:8px 0;
+  cursor:pointer;transition:border-color .2s;
+}
+.code-box:hover{border-color:var(--saffron)}
+.code-box::after{
+  content:'TAP TO COPY';position:absolute;bottom:6px;right:8px;
+  font-size:8px;letter-spacing:1px;color:var(--saffron);font-family:'Outfit',sans-serif;
+}
+.paste-area{
+  width:100%;background:var(--s3);border:1.5px solid var(--bd2);
+  border-radius:10px;padding:10px 14px;font-family:monospace;font-size:10px;
+  color:var(--t2);line-height:1.4;resize:none;height:70px;outline:none;
+  transition:border-color .2s;
+}
+.paste-area:focus{border-color:var(--saffron)}
+.paste-area::placeholder{color:var(--t4);font-family:'Outfit',sans-serif;font-size:11px}
+
+.data-stats{
+  background:var(--s2);border-radius:10px;padding:10px 14px;
+  font-size:11px;color:var(--t3);line-height:1.8;margin-bottom:8px;
+}
+.data-stats span{color:var(--t2);font-weight:600}
+.modal-close-btn{
+  margin:4px 20px 0;width:calc(100% - 40px);
+  padding:12px;border-radius:12px;border:none;cursor:pointer;
+  background:var(--s2);color:var(--t3);font-family:'Outfit',sans-serif;
+  font-size:14px;-webkit-tap-highlight-color:transparent;
+}
 </style>
 </head>
 <body>
@@ -563,6 +664,57 @@ textarea::-webkit-scrollbar{display:none}
 
 <div class="sec-lbl">WEEKLY SADHANA — 36 WEEKS REMAINING</div>
 <div class="weeks" id="weeksContainer"></div>
+
+<!-- SYNC FAB -->
+<button class="sync-fab" onclick="openSync()" aria-label="Sync & Backup">
+  💾
+  <div class="fab-dot" id="fabDot" title="Data saved locally"></div>
+</button>
+
+<!-- SYNC MODAL -->
+<div class="modal-backdrop" id="syncBackdrop" onclick="handleBackdropClick(event)">
+  <div class="sync-modal" id="syncModal">
+    <div class="modal-drag"></div>
+    <div class="modal-title">💾 DATA SYNC</div>
+    <div class="modal-sub">Keep your progress safe. Sync between phone & PC.</div>
+
+    <!-- DATA STATUS -->
+    <div class="sync-section">
+      <div class="sync-sec-title">📊 Current Data</div>
+      <div class="data-stats" id="dataStats">Loading...</div>
+    </div>
+
+    <!-- SYNC CODE -->
+    <div class="sync-section">
+      <div class="sync-sec-title">📋 Sync Code — Copy to any device</div>
+      <div class="code-box" id="codeBox" onclick="copySyncCode()" title="Tap to copy"></div>
+      <button class="sync-btn primary" onclick="copySyncCode()">📋 Copy Sync Code</button>
+    </div>
+
+    <!-- PASTE CODE -->
+    <div class="sync-section">
+      <div class="sync-sec-title">📥 Restore from Sync Code</div>
+      <textarea class="paste-area" id="pasteArea" placeholder="Paste your sync code here to restore data on this device..."></textarea>
+      <button class="sync-btn green" onclick="restoreFromCode()" style="margin-top:8px">✅ Restore Data</button>
+    </div>
+
+    <!-- EXPORT / IMPORT FILE -->
+    <div class="sync-section">
+      <div class="sync-sec-title">📂 Export / Import File (Backup)</div>
+      <button class="sync-btn secondary" onclick="exportJSON()">⬇️ Download Backup (.json)</button>
+      <button class="sync-btn secondary" onclick="document.getElementById('importFile').click()">⬆️ Import from File</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+    </div>
+
+    <!-- DANGER -->
+    <div class="sync-section">
+      <div class="sync-sec-title">⚠️ Danger Zone</div>
+      <button class="sync-btn danger" onclick="clearAllData()">🗑️ Clear All Data (Cannot Undo)</button>
+    </div>
+
+    <button class="modal-close-btn" onclick="closeSync()">✕ Close</button>
+  </div>
+</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -1124,6 +1276,137 @@ function init(){
   else if(hour>=6&&hour<12)showToast('🙏 Jai Shri Ram! Good morning, Sadhak.','',3000);
   else if(hour>=21||hour<4)showToast('😴 Time to sleep early for 4am rise!','',3000);
 }
+
+// ═══════════════ SYNC & BACKUP ═══════════════
+function getSyncCode(){
+  const raw=localStorage.getItem(KEY)||'{}';
+  try{
+    return btoa(unescape(encodeURIComponent(raw)));
+  }catch(e){return btoa(raw);}
+}
+function decodeSyncCode(code){
+  try{return decodeURIComponent(escape(atob(code.trim())));}
+  catch(e){try{return atob(code.trim());}catch{return null;}}
+}
+
+function openSync(){
+  const bd=document.getElementById('syncBackdrop');
+  bd.classList.add('open');
+  refreshDataStats();
+  // Generate code
+  const code=getSyncCode();
+  const box=document.getElementById('codeBox');
+  box.textContent=code.length>120?code.substring(0,120)+'…':code;
+  box.dataset.full=code;
+}
+function closeSync(){
+  document.getElementById('syncBackdrop').classList.remove('open');
+  document.getElementById('pasteArea').value='';
+}
+function handleBackdropClick(e){
+  if(e.target===document.getElementById('syncBackdrop'))closeSync();
+}
+
+function refreshDataStats(){
+  const data=load();
+  const weeks=Object.keys(data).filter(k=>!isNaN(k)).length;
+  const checks=Object.values(data).filter((_,i)=>!isNaN(Object.keys(data)[i]))
+    .reduce((sum,wd)=>{
+      return sum+HABITS.reduce((s,h)=>s+((wd[h.id]||[]).filter(Boolean).length),0);
+    },0);
+  const bytes=new Blob([localStorage.getItem(KEY)||'']).size;
+  const kb=(bytes/1024).toFixed(1);
+  const {streak,perfect,lost}=calcStats();
+  const bc=calcBCStreak();
+  document.getElementById('dataStats').innerHTML=
+    `Weeks tracked: <span>${weeks}</span> &nbsp;|&nbsp; `+
+    `Checkmarks: <span>${checks}</span><br>`+
+    `Perfect weeks: <span>${perfect}</span> &nbsp;|&nbsp; `+
+    `Current streak: <span>${streak}w</span><br>`+
+    `Brahmacharya: <span>${bc} days</span> &nbsp;|&nbsp; `+
+    `Storage used: <span>${kb}KB</span>`;
+}
+
+function copySyncCode(){
+  const code=document.getElementById('codeBox').dataset.full||getSyncCode();
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code).then(()=>{
+      showToast('📋 Sync code copied! Paste on any device.','gold',2500);
+    }).catch(()=>fallbackCopy(code));
+  } else {fallbackCopy(code);}
+}
+function fallbackCopy(text){
+  const ta=document.createElement('textarea');
+  ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');showToast('📋 Copied!','gold',2000);}
+  catch(e){showToast('❌ Copy failed — select code manually','',3000);}
+  document.body.removeChild(ta);
+}
+
+function restoreFromCode(){
+  const code=document.getElementById('pasteArea').value.trim();
+  if(!code){showToast('⚠️ Paste your sync code first','',2000);return;}
+  const json=decodeSyncCode(code);
+  if(!json){showToast('❌ Invalid sync code','',2500);return;}
+  try{
+    const parsed=JSON.parse(json);
+    if(typeof parsed!=='object')throw new Error();
+    // Confirm
+    if(!confirm('This will REPLACE your current data on this device with the sync code data. Continue?'))return;
+    localStorage.setItem(KEY,json);
+    showToast('✅ Data restored! Reloading…','',2000);
+    setTimeout(()=>location.reload(),1800);
+  }catch(e){showToast('❌ Invalid data in code','',2500);}
+}
+
+function exportJSON(){
+  const data=localStorage.getItem(KEY)||'{}';
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const d=new Date();
+  a.href=url;
+  a.download=`sadhak2026-backup-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('⬇️ Backup downloaded!','gold',2500);
+}
+
+function importJSON(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const json=e.target.result;
+      const parsed=JSON.parse(json);
+      if(typeof parsed!=='object')throw new Error();
+      if(!confirm('Import this backup? Current data will be replaced.'))return;
+      localStorage.setItem(KEY,json);
+      showToast('✅ Backup imported! Reloading…','',2000);
+      setTimeout(()=>location.reload(),1800);
+    }catch(err){showToast('❌ Invalid backup file','',2500);}
+  };
+  reader.readAsText(file);
+  event.target.value=''; // reset so same file can be re-selected
+}
+
+function clearAllData(){
+  if(!confirm('⚠️ DELETE ALL your tracking data? This cannot be undone!'))return;
+  if(!confirm('Are you SURE? All weeks, streaks, and notes will be lost.'))return;
+  localStorage.removeItem(KEY);
+  showToast('🗑️ All data cleared. Reloading…','fire',2000);
+  setTimeout(()=>location.reload(),1800);
+}
+
+// Auto-save indicator — flash FAB dot on every save
+const _origSave=save;
+window.save=function(d){
+  _origSave(d);
+  const dot=document.getElementById('fabDot');
+  if(dot){dot.style.background='var(--saffron)';setTimeout(()=>dot.style.background='var(--green)',600);}
+};
 
 init();
 </script>
